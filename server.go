@@ -18,6 +18,12 @@ type PlayCommand struct {
 	DeviceID string `json:"device"`
 }
 
+type SearchResult struct {
+	Name   string `json:"name"`
+	Artist string `json:"artist"`
+	URI    string `json:"uri"`
+}
+
 type SpotifyDevice struct {
 	Name string `json:"name"`
 	ID   string `json:"id"`
@@ -44,16 +50,17 @@ func main() {
 func SearchHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	songSearch := vars["keyword"]
-	fmt.Printf("Searching for %s\n", songSearch)
 	results, err := spotify.Search(songSearch, spotify.SearchTypeTrack)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	track := results.Tracks.Tracks[0]
-
-	var resultJson = fmt.Sprintf("{\"name\": \"%s\", \"artist\": \"%s\", \"URI\": \"%s\"}", track.SimpleTrack.Name, track.SimpleTrack.Artists[0].Name, track.URI)
-	fmt.Println(resultJson)
+	var searchResults []SearchResult
+	for _, track := range results.Tracks.Tracks {
+		searchResult := SearchResult{Name: track.SimpleTrack.Name, Artist: track.SimpleTrack.Artists[0].Name, URI: string(track.URI)}
+		searchResults = append(searchResults, searchResult)
+	}
+	resultJson, _ := json.Marshal(searchResults)
 
 	w.Header().Set("Content-Type", "application/json")
 	w.Write([]byte(resultJson))

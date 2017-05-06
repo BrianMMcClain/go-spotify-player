@@ -1,14 +1,14 @@
 package main
 
 import (
+	"encoding/json"
+	"errors"
 	"fmt"
-	"log"
-  "errors"
-  "encoding/json"
-	"net/http"
-  "io/ioutil"
 	"github.com/zmb3/spotify"
-  "golang.org/x/oauth2"
+	"golang.org/x/oauth2"
+	"io/ioutil"
+	"log"
+	"net/http"
 )
 
 const redirectURI = "http://localhost:8080/callback"
@@ -20,30 +20,30 @@ var (
 )
 
 func newClient(key string, secret string) *spotify.Client {
-  var token *oauth2.Token
-  var err error
+	var token *oauth2.Token
+	var err error
 	if token, err = getCachedToken(); err == nil {
-  } else {
-    token, err = getNewToken(key, secret)
-    cacheToken(token)
-  }
+	} else {
+		token, err = getNewToken(key, secret)
+		cacheToken(token)
+	}
 
-  client := auth.NewClient(token)
-  return &client
+	client := auth.NewClient(token)
+	return &client
 }
 
 func getCachedToken() (*oauth2.Token, error) {
-  tokB, err := ioutil.ReadFile("spotify_token.json")
-  if err != nil {
-    return nil, errors.New("No cached token")
-  }
+	tokB, err := ioutil.ReadFile("spotify_token.json")
+	if err != nil {
+		return nil, errors.New("No cached token")
+	}
 
-  var token oauth2.Token
-  if err := json.Unmarshal(tokB, &token); err != nil {
-    panic(err)
-  }
+	var token oauth2.Token
+	if err := json.Unmarshal(tokB, &token); err != nil {
+		panic(err)
+	}
 
-  return &token, nil
+	return &token, nil
 }
 
 func getNewToken(key string, secret string) (*oauth2.Token, error) {
@@ -57,8 +57,8 @@ func getNewToken(key string, secret string) (*oauth2.Token, error) {
 	url := auth.AuthURL(state)
 	fmt.Println("Please log in to Spotify by visiting the following page in your browser:", url)
 
-  token := <-ch
-  return token, nil
+	token := <-ch
+	return token, nil
 }
 
 func completeAuth(w http.ResponseWriter, r *http.Request) {
@@ -75,9 +75,9 @@ func completeAuth(w http.ResponseWriter, r *http.Request) {
 }
 
 func cacheToken(token *oauth2.Token) {
-  tokJson, _ := json.Marshal(token)
-  err := ioutil.WriteFile("spotify_token.json", tokJson, 0644)
-  if err != nil {
-      panic(err)
-  }
+	tokJson, _ := json.Marshal(token)
+	err := ioutil.WriteFile("spotify_token.json", tokJson, 0644)
+	if err != nil {
+		panic(err)
+	}
 }

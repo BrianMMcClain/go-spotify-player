@@ -19,12 +19,12 @@ var (
 	state = "miles_spotify_player"
 )
 
-func newClient() *spotify.Client {
+func newClient(key string, secret string) *spotify.Client {
   var token *oauth2.Token
   var err error
 	if token, err = getCachedToken(); err == nil {
   } else {
-    token, err = getNewToken()
+    token, err = getNewToken(key, secret)
     cacheToken(token)
   }
 
@@ -46,13 +46,14 @@ func getCachedToken() (*oauth2.Token, error) {
   return &token, nil
 }
 
-func getNewToken() (*oauth2.Token, error) {
+func getNewToken(key string, secret string) (*oauth2.Token, error) {
 	http.HandleFunc("/callback", completeAuth)
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		log.Println("Got request for:", r.URL.String())
 	})
 	go http.ListenAndServe(":8080", nil)
 
+	auth.SetAuthInfo(key, secret)
 	url := auth.AuthURL(state)
 	fmt.Println("Please log in to Spotify by visiting the following page in your browser:", url)
 

@@ -1,0 +1,5 @@
+{
+  "port": 8000,
+  "key": "SPOTIFY_OAUTH_KEY",
+  "secret": "SPOTIFY_OAUTH_SECRET"
+}

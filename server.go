@@ -39,6 +39,10 @@ type PlayerStatus struct {
 	Artist     string `json:"artist"`
 }
 
+type ErrorResponse struct {
+	Error string `json:"error"`
+}
+
 func main() {
 
 	config, err := parseConfig("config.json")
@@ -58,12 +62,24 @@ func main() {
 	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", config.Port), r))
 }
 
+func WriteError(w http.ResponseWriter, err error) {
+	errResponse := ErrorResponse{Error: err.Error()}
+	errJson, _ := json.Marshal(errResponse)
+	WriteResponse(w, string(errJson))
+}
+
+func WriteResponse(w http.ResponseWriter, response string) {
+	log.Println(response)
+	w.Header().Set("Content-Type", "application/json")
+	w.Write([]byte(response))
+}
+
 func SearchHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	songSearch := vars["keyword"]
 	results, err := spotify.Search(songSearch, spotify.SearchTypeTrack)
 	if err != nil {
-		log.Fatal(err)
+		WriteError(w, err)
 	}
 
 	var searchResults []SearchResult
@@ -71,10 +87,11 @@ func SearchHandler(w http.ResponseWriter, r *http.Request) {
 		searchResult := SearchResult{Name: track.SimpleTrack.Name, Artist: track.SimpleTrack.Artists[0].Name, URI: string(track.URI)}
 		searchResults = append(searchResults, searchResult)
 	}
-	resultJson, _ := json.Marshal(searchResults)
-
-	w.Header().Set("Content-Type", "application/json")
-	w.Write([]byte(resultJson))
+	resultJson, err := json.Marshal(searchResults)
+	if err != nil {
+		WriteError(w, err)
+	}
+	WriteResponse(w, string(resultJson))
 }
 
 func PlayHandler(w http.ResponseWriter, r *http.Request) {
@@ -82,7 +99,11 @@ func PlayHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func PlayTrackHandler(w http.ResponseWriter, r *http.Request) {
-	b, _ := ioutil.ReadAll(r.Body)
+	b, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		WriteError(w, err)
+	}
+
 	var command PlayCommand
 	json.Unmarshal(b, &command)
 
@@ -99,7 +120,10 @@ func PauseHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func DevicesHandler(w http.ResponseWriter, r *http.Request) {
-	devices, _ := client.PlayerDevices()
+	devices, err := client.PlayerDevices()
+	if err != nil {
+		WriteError(w, err)
+	}
 
 	// Build list of devices
 	var sDevices []SpotifyDevice
@@ -108,14 +132,19 @@ func DevicesHandler(w http.ResponseWriter, r *http.Request) {
 		sDevices = append(sDevices, sd)
 	}
 
-	jDevices, _ := json.Marshal(sDevices)
+	jDevices, err := json.Marshal(sDevices)
+	if err != nil {
+		WriteError(w, err)
+	}
 
-	w.Header().Set("Content-Type", "application/json")
-	w.Write([]byte(jDevices))
+	WriteResponse(w, string(jDevices))
 }
 
 func StatusHandler(w http.ResponseWriter, r *http.Request) {
-	playerState, _ := client.PlayerState()
+	playerState, err := client.PlayerState()
+	if err != nil {
+		WriteError(w, err)
+	}
 
 	var status PlayerStatus
 	status.Playing = playerState.CurrentlyPlaying.Playing
@@ -132,6 +161,5 @@ func StatusHandler(w http.ResponseWriter, r *http.Request) {
 
 	jStatus, _ := json.Marshal(status)
 
-	w.Header().Set("Content-Type", "application/json")
-	w.Write([]byte(jStatus))
+	WriteResponse(w, string(jStatus))
 }

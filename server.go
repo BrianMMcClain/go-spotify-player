@@ -22,6 +22,7 @@ type PlayCommand struct {
 type SearchResult struct {
 	Name   string `json:"name"`
 	Artist string `json:"artist"`
+	Album  string `json:"album"`
 	URI    string `json:"uri"`
 }
 
@@ -91,7 +92,7 @@ func SearchHandler(w http.ResponseWriter, r *http.Request) {
 
 	var searchResults []SearchResult
 	for _, track := range results.Tracks.Tracks {
-		searchResult := SearchResult{Name: track.SimpleTrack.Name, Artist: track.SimpleTrack.Artists[0].Name, URI: string(track.URI)}
+		searchResult := SearchResult{Name: track.SimpleTrack.Name, Artist: track.SimpleTrack.Artists[0].Name, Album: track.Album.Name, URI: string(track.URI)}
 		searchResults = append(searchResults, searchResult)
 	}
 	resultJson, err := json.Marshal(searchResults)

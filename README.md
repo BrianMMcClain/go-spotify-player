@@ -25,6 +25,7 @@ REST API
 ---
 | Method | Endpoint | Action          | Example Data          | Example Response |
 |--------|----------|-----------------|-----------------------|------------------|
+| GET | /status     | Playback Status | N/A                   | {"playing":true,"deviceID":"x","deviceName":"x","url":"x","progress":0,"track":"x","artist":"x"} |
 | GET    | /play    | Resume Playback | N/A                   | None             |
 | POST   | /play    | Play Track      | {"uri": "TRACK_URI"}  | None             |
 | GET    | /devices | Get List of Devices | N/A               | [{"name": "Device Name", "id": "xxxxxxxxx"}] |

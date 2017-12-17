@@ -40,6 +40,11 @@ type PlayerStatus struct {
 	Artist     string `json:"artist"`
 }
 
+type Playlist struct {
+	Name string `json:"name"`
+	URI  string `json:"uri"`
+}
+
 type ErrorResponse struct {
 	Error string `json:"error"`
 }
@@ -60,6 +65,7 @@ func main() {
 	r.HandleFunc("/pause", PauseHandler)
 	r.HandleFunc("/devices", DevicesHandler)
 	r.HandleFunc("/status", StatusHandler)
+	r.HandleFunc("/playlists", PlaylistsHandler)
 	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", config.Port), r))
 }
 
@@ -163,4 +169,23 @@ func StatusHandler(w http.ResponseWriter, r *http.Request) {
 	jStatus, _ := json.Marshal(status)
 
 	WriteResponse(w, string(jStatus))
+}
+
+func PlaylistsHandler(w http.ResponseWriter, r *http.Request) {
+	userPlaylists, err := client.CurrentUsersPlaylists()
+	if err != nil {
+		WriteError(w, err)
+	}
+
+	var playlists []Playlist
+	for _, userPlaylist := range userPlaylists.Playlists {
+		playlist := Playlist{Name: userPlaylist.Name, URI: string(userPlaylist.URI)}
+		playlists = append(playlists, playlist)
+	}
+	resultsJson, err := json.Marshal(playlists)
+	if err != nil {
+		WriteError(w, err)
+	}
+
+	WriteResponse(w, string(resultsJson))
 }

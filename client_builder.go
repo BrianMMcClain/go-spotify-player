@@ -4,17 +4,18 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/zmb3/spotify"
-	"golang.org/x/oauth2"
 	"io/ioutil"
 	"log"
 	"net/http"
+
+	"github.com/zmb3/spotify"
+	"golang.org/x/oauth2"
 )
 
 const redirectURI = "http://localhost:8080/callback"
 
 var (
-	auth  = spotify.NewAuthenticator(redirectURI, spotify.ScopeUserReadPrivate)
+	auth  = spotify.NewAuthenticator(redirectURI, spotify.ScopeUserReadCurrentlyPlaying, spotify.ScopeUserReadPlaybackState, spotify.ScopeUserModifyPlaybackState)
 	ch    = make(chan *oauth2.Token)
 	state = "miles_spotify_player"
 )
@@ -79,5 +80,7 @@ func cacheToken(token *oauth2.Token) {
 	err := ioutil.WriteFile("spotify_token.json", tokJson, 0644)
 	if err != nil {
 		panic(err)
+	} else {
+		fmt.Println("Token cached")
 	}
 }

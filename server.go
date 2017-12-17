@@ -3,11 +3,12 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/gorilla/mux"
-	"github.com/zmb3/spotify"
 	"io/ioutil"
 	"log"
 	"net/http"
+
+	"github.com/gorilla/mux"
+	"github.com/zmb3/spotify"
 )
 
 var client *spotify.Client
@@ -77,7 +78,7 @@ func WriteResponse(w http.ResponseWriter, response string) {
 func SearchHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	songSearch := vars["keyword"]
-	results, err := spotify.Search(songSearch, spotify.SearchTypeTrack)
+	results, err := client.Search(songSearch, spotify.SearchTypeTrack)
 	if err != nil {
 		WriteError(w, err)
 	}

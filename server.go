@@ -39,6 +39,8 @@ type PlayerStatus struct {
 	Progress   int    `json:"progress"`
 	Track      string `json:"track"`
 	Artist     string `json:"artist"`
+	Shuffle    bool   `json:"shuffle"`
+	Repeat     string `json:"repeat"`
 }
 
 type Playlist struct {
@@ -187,7 +189,7 @@ func StatusHandler(w http.ResponseWriter, r *http.Request) {
 	status.Playing = playerState.CurrentlyPlaying.Playing
 
 	if playerState != nil {
-		status.DeviceID = string(playerState.Device.ID)
+		status.DeviceID = playerState.Device.ID.String()
 		status.DeviceName = playerState.Device.Name
 	}
 
@@ -195,6 +197,8 @@ func StatusHandler(w http.ResponseWriter, r *http.Request) {
 	status.Progress = playerState.CurrentlyPlaying.Progress
 	status.Track = playerState.CurrentlyPlaying.Item.SimpleTrack.Name
 	status.Artist = playerState.CurrentlyPlaying.Item.SimpleTrack.Artists[0].Name
+	status.Shuffle = playerState.ShuffleState
+	status.Repeat = playerState.RepeatState
 
 	jStatus, _ := json.Marshal(status)
 

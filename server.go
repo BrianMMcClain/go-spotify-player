@@ -63,6 +63,7 @@ func main() {
 	r.HandleFunc("/search/{keyword}", SearchHandler)
 	r.HandleFunc("/play", PlayHandler).Methods("GET")
 	r.HandleFunc("/play", PlayTrackHandler).Methods("POST")
+	r.HandleFunc("/playPlaylist", PlayPlaylistHandler).Methods("POST")
 	r.HandleFunc("/pause", PauseHandler)
 	r.HandleFunc("/devices", DevicesHandler)
 	r.HandleFunc("/status", StatusHandler)
@@ -116,6 +117,24 @@ func PlayTrackHandler(w http.ResponseWriter, r *http.Request) {
 	json.Unmarshal(b, &command)
 
 	pOpts := spotify.PlayOptions{URIs: []spotify.URI{spotify.URI(command.TrackURI)}}
+	if len(command.DeviceID) > 0 {
+		dID := spotify.ID(command.DeviceID)
+		pOpts.DeviceID = &dID
+	}
+	_ = client.PlayOpt(&pOpts)
+}
+
+func PlayPlaylistHandler(w http.ResponseWriter, r *http.Request) {
+	b, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		WriteError(w, err)
+	}
+
+	var command PlayCommand
+	json.Unmarshal(b, &command)
+
+	var context = spotify.URI(command.TrackURI)
+	pOpts := spotify.PlayOptions{PlaybackContext: &context}
 	if len(command.DeviceID) > 0 {
 		dID := spotify.ID(command.DeviceID)
 		pOpts.DeviceID = &dID

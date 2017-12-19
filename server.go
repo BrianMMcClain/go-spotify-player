@@ -65,6 +65,8 @@ func main() {
 	r.HandleFunc("/play", PlayTrackHandler).Methods("POST")
 	r.HandleFunc("/playPlaylist", PlayPlaylistHandler).Methods("POST")
 	r.HandleFunc("/pause", PauseHandler)
+	r.HandleFunc("/next", NextHandler)
+	r.HandleFunc("/previous", PreviousHandler)
 	r.HandleFunc("/devices", DevicesHandler)
 	r.HandleFunc("/status", StatusHandler)
 	r.HandleFunc("/playlists", PlaylistsHandler)
@@ -144,6 +146,14 @@ func PlayPlaylistHandler(w http.ResponseWriter, r *http.Request) {
 
 func PauseHandler(w http.ResponseWriter, r *http.Request) {
 	client.Pause()
+}
+
+func NextHandler(w http.ResponseWriter, r *http.Request) {
+	client.Next()
+}
+
+func PreviousHandler(w http.ResponseWriter, r *http.Request) {
+	client.Previous()
 }
 
 func DevicesHandler(w http.ResponseWriter, r *http.Request) {

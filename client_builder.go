@@ -29,6 +29,7 @@ func newClient(key string, secret string) *spotify.Client {
 		cacheToken(token)
 	}
 
+	auth.SetAuthInfo(key, secret)
 	client := auth.NewClient(token)
 	return &client
 }

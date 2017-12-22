@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"strconv"
 
 	"github.com/gorilla/mux"
 	"github.com/zmb3/spotify"
@@ -72,6 +73,7 @@ func main() {
 	r.HandleFunc("/devices", DevicesHandler)
 	r.HandleFunc("/status", StatusHandler)
 	r.HandleFunc("/playlists", PlaylistsHandler)
+	r.HandleFunc("/volume/{volume}", VolumeHandler)
 
 	log.Printf("Starting server on port %d\n", config.Port)
 	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", config.Port), r))
@@ -224,4 +226,14 @@ func PlaylistsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	WriteResponse(w, string(resultsJson))
+}
+
+func VolumeHandler(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	sVolume := vars["volume"]
+	volume, err := strconv.Atoi(sVolume)
+	if err != nil {
+		WriteError(w, err)
+	}
+	client.Volume(volume)
 }

@@ -72,6 +72,8 @@ func main() {
 	r.HandleFunc("/devices", DevicesHandler)
 	r.HandleFunc("/status", StatusHandler)
 	r.HandleFunc("/playlists", PlaylistsHandler)
+
+	log.Printf("Starting server on port %d\n", config.Port)
 	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", config.Port), r))
 }
 

@@ -71,6 +71,7 @@ func main() {
 	r.HandleFunc("/next", NextHandler)
 	r.HandleFunc("/previous", PreviousHandler)
 	r.HandleFunc("/devices", DevicesHandler)
+	r.HandleFunc("/shuffle/{shuffle}", ShuffleHandler)
 	r.HandleFunc("/status", StatusHandler)
 	r.HandleFunc("/playlists", PlaylistsHandler)
 	r.HandleFunc("/volume/{volume}", VolumeHandler)
@@ -236,4 +237,15 @@ func VolumeHandler(w http.ResponseWriter, r *http.Request) {
 		WriteError(w, err)
 	}
 	client.Volume(volume)
+}
+
+func ShuffleHandler(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	shuffle := vars["shuffle"]
+	switch shuffle {
+	case "on":
+		client.Shuffle(true)
+	case "off":
+		client.Shuffle(false)
+	}
 }
